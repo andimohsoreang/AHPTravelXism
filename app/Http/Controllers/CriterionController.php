@@ -88,7 +88,43 @@ class CriterionController extends Controller
 
         $ci = ($ci - $n) / ($n - 1);
 
-        $ri = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
+        $ri = [
+            0.0000,
+            0.0000,
+            0.5245,
+            0.8815,
+            1.1086,
+            1.2479,
+            1.3417,
+            1.4056,
+            1.4499,
+            1.4854,
+            1.5141,
+            1.5365,
+            1.5551,
+            1.5713,
+            1.5838,
+            1.5978,
+            1.6086,
+            1.6181,
+            1.6265,
+            1.6341,
+            1.6409,
+            1.6470,
+            1.6526,
+            1.6577,
+            1.6624,
+            1.6667,
+            1.6706,
+            1.6743,
+            1.6777,
+            1.6809,
+            1.6839,
+            1.6867,
+            1.6893,
+            1.6917,
+            1.6962
+        ];
 
         $cr = $n > 0 ? $ci / $ri[$n] : 0;
 
@@ -123,7 +159,6 @@ class CriterionController extends Controller
             foreach ($criterias as $criterion) {
                 $subCriterias = SubCriterion::where('criterion_id', $criterion->id)->get();
                 $nSub = count($subCriterias);
-
                 $subMatrix = array_fill_keys($subCriterias->pluck('id')->all(), array_fill_keys($subCriterias->pluck('id')->all(), 1));
                 $subWeights = [];
 
@@ -149,13 +184,6 @@ class CriterionController extends Controller
                 $bestAlternative = $alternative;
             }
         }
-
         return view('kriteria.calculate_ahp', compact('criterias', 'matrix', 'ci', 'cr', 'consistency', 'bestAlternative', 'finalWeights'));
     }
-
-
-
-
-
-
 }

@@ -17,6 +17,13 @@ class CreateAlternativesTable extends Migration
             $table->id();
             $table->string('name');
             $table->timestamps();
+
+            $criteriaList = \App\Models\Criterion::all();
+
+            foreach ($criteriaList as $criterion) {
+                $table->unsignedBigInteger('criteria_id_' . $criterion->id)->nullable();
+                $table->foreign('criteria_id_' . $criterion->id)->references('id')->on('criteria')->onDelete('cascade');
+            }
         });
     }
 
@@ -30,3 +37,4 @@ class CreateAlternativesTable extends Migration
         Schema::dropIfExists('alternatives');
     }
 }
+

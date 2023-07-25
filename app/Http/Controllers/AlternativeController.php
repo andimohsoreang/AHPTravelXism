@@ -3,20 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alternative;
+use App\Models\Criterion;
+use App\Models\SubCriterion;
 use Illuminate\Http\Request;
 
 class AlternativeController extends Controller
 {
-    public function index()
+    public function index(Criterion $criterion, SubCriterion $subCriterion)
     {
+        $criteria = Criterion::all();
+        $subCriteria = SubCriterion::all();
         $alternatives = Alternative::all();
-
-        return view('alternatif.get', compact('alternatives'));
+        return view('alternatif.get', compact('alternatives', 'criteria', 'subCriteria'));
     }
 
-    public function create()
+    public function create(Criterion $criterion, SubCriterion $subCriterion)
     {
-        return view('alternatif.get');
+        $criteria = Criterion::all();
+        $subCriteria = SubCriterion::all();
+
+        return view('alternatif.create', compact('criteria', 'subCriteria'));
     }
 
     public function store(Request $request)
@@ -25,7 +31,21 @@ class AlternativeController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        Alternative::create($request->all());
+        $criteriaList = Criterion::all();
+        $criteriaData = [];
+
+        foreach ($criteriaList as $criterion) {
+            $subCriterionId = $request['sub_criterion_id_' . $criterion->id];
+
+            if ($subCriterionId) {
+                $criteriaData['criteria_id_' . $criterion->id] = $subCriterionId;
+            }
+        }
+
+        // Merge the criteria data with the rest of the request data
+        $data = array_merge($request->all(), $criteriaData);
+
+        Alternative::create($data);
 
         return redirect()->route('alternatif.get')->with('success', 'Alternative created successfully.');
     }
@@ -36,8 +56,20 @@ class AlternativeController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
+        // Get the list of criteria dynamically
+        $criteriaList = Criterion::all();
+
+        // Prepare the criteria data for updating
+        $criteriaData = [];
+        foreach ($criteriaList as $criterion) {
+            $criteriaData['criteria_id_' . $criterion->id] = $request['criteria_id_' . $criterion->id];
+        }
+
+        // Combine the criteria data with the rest of the request data
+        $data = array_merge($request->all(), $criteriaData);
+
         $alternative = Alternative::findOrFail($id);
-        $alternative->update($request->all());
+        $alternative->update($data);
 
         return redirect()->route('alternatif.get')->with('success', 'Alternative updated successfully.');
     }

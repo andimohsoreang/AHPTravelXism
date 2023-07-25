@@ -1,4 +1,4 @@
-use App\Http\Controllers\AlternativeController;
+<!-- resources/views/alternatif/get.blade.php -->
 
 @extends('layouts.default')
 
@@ -26,12 +26,11 @@ use App\Http\Controllers\AlternativeController;
             </div>
         </div>
     </div>
+
     <section class="section">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">
-                    Daftar Alternatif
-                </h5>
+                <h5 class="card-title">Daftar Alternatif</h5>
                 <button type="button" class="btn btn-primary d-flex float-end" data-bs-toggle="modal"
                     data-bs-target="#addAlternativeModal">
                     Tambah Alternatif
@@ -43,6 +42,9 @@ use App\Http\Controllers\AlternativeController;
                         <tr>
                             <th>No</th>
                             <th>Nama Alternatif</th>
+                            @foreach ($criteria as $criterion)
+                                <th>{{ $criterion->name }}</th>
+                            @endforeach
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -51,11 +53,20 @@ use App\Http\Controllers\AlternativeController;
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $alternative->name }}</td>
+                                @foreach ($criteria as $criterion)
+                                    @php
+                                        $criterionId = 'criteria_id_' . $criterion->id;
+                                        $subCriterion = \App\Models\SubCriterion::find($alternative->$criterionId);
+                                    @endphp
+                                    <td>{{ $subCriterion->name  }}</td>
+                                @endforeach
                                 <td>
                                     <a href="#" class="btn icon btn-sm btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#editAlternativeModal{{ $alternative->id }}"><i class="bi bi-pencil"></i></a>
+                                        data-bs-target="#editAlternativeModal{{ $alternative->id }}"><i
+                                            class="bi bi-pencil"></i></a>
                                     <a href="#" class="btn icon btn-sm btn-danger" data-bs-toggle="modal"
-                                        data-bs-target="#deleteAlternativeModal{{ $alternative->id }}"><i class="bi bi-x"></i></a>
+                                        data-bs-target="#deleteAlternativeModal{{ $alternative->id }}"><i
+                                            class="bi bi-x"></i></a>
                                 </td>
                             </tr>
                         @endforeach
@@ -66,8 +77,8 @@ use App\Http\Controllers\AlternativeController;
     </section>
 
     <!-- Tambah Alternatif Modal -->
-    <div class="modal fade" id="addAlternativeModal" tabindex="-1" role="dialog"
-        aria-labelledby="addAlternativeModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addAlternativeModal" tabindex="-1" role="dialog" aria-labelledby="addAlternativeModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -82,6 +93,16 @@ use App\Http\Controllers\AlternativeController;
                             <input id="nama-alternatif" type="text" name="name" placeholder="Nama Alternatif"
                                 class="form-control">
                         </div>
+                        @foreach ($criteria as $criterion)
+                            <div class="form-group">
+                                <label for="{{ 'criteria_id_' . $criterion->id }}">{{ $criterion->name }}</label>
+                                <select class="form-control" id="{{ 'criteria_id_' . $criterion->id }}" name="{{ 'criteria_id_' . $criterion->id }}">
+                                    @foreach ($subCriteria as $subCriterion)
+                                        <option value="{{ $subCriterion->id }}">{{ $subCriterion->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endforeach
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -107,10 +128,23 @@ use App\Http\Controllers\AlternativeController;
                         @method('PUT')
                         <div class="modal-body">
                             <div class="form-group">
-                                <label for="nama-alternatif{{ $alternative->id }}">Nama Alternatif</label>
-                                <input id="nama-alternatif{{ $alternative->id }}" type="text" name="name"
-                                    placeholder="Nama Alternatif" class="form-control" value="{{ $alternative->name }}">
+                                <label for="edit-nama-alternatif">Nama Alternatif</label>
+                                <input id="edit-nama-alternatif" type="text" name="name" value="{{ $alternative->name }}"
+                                    class="form-control">
                             </div>
+                            @foreach ($criteria as $criterion)
+                                <div class="form-group">
+                                    <label for="{{ 'edit_criteria_id_' . $criterion->id }}">{{ $criterion->name }}</label>
+                                    <select class="form-control" id="{{ 'edit_criteria_id_' . $criterion->id }}"
+                                        name="{{ 'criteria_id_' . $criterion->id }}">
+                                        @foreach ($subCriteria as $subCriterion)
+                                            <option value="{{ $subCriterion->id }}"
+                                                {{ $subCriterion->id === $alternative->{'criteria_id_' . $criterion->id} ? 'selected' : '' }}>
+                                                {{ $subCriterion->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endforeach
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
