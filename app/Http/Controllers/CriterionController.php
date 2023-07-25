@@ -1,56 +1,17 @@
 <?php
 
+namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\AlternativeController;
+use App\Http\Controllers\SubCriterionController;
 use App\Models\Criterion;
+use App\Models\Alternative;
+use App\Models\SubCriterion;
 use Illuminate\Http\Request;
 
 class CriterionController extends Controller
 {
-    private function calculateConsistencyIndex($matrix)
-    {
-        $n = count($matrix);
-        $sumColumn = array_fill(0, $n, 0);
-
-        for ($j = 0; $j < $n; $j++) {
-            for ($i = 0; $i < $n; $i++) {
-                $sumColumn[$j] += $matrix[$i][$j];
-            }
-        }
-
-        $ci = 0;
-
-        for ($j = 0; $j < $n; $j++) {
-            $ci += $sumColumn[$j] / ($n * $matrix[$j][$j]);
-        }
-
-        $ci = ($ci - $n) / ($n - 1);
-        return $ci;
-    }
-
-    private function calculateConsistencyRatio($ci, $n)
-    {
-        $ri = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
-        $cr = $ci / $ri[$n];
-        return $cr;
-    }
-
-    private function checkConsistencyIndex($matrix)
-    {
-        $n = count($matrix);
-
-        $ci = $this->calculateConsistencyIndex($matrix);
-        $cr = $this->calculateConsistencyRatio($ci, $n);
-
-        $tolerance = 0.1;
-        $consistency = abs($cr) < $tolerance;
-
-        return [
-            'ci' => $ci,
-            'cr' => $cr,
-            'consistency' => $consistency,
-        ];
-    }
-
     public function index()
     {
         $criterias = Criterion::all();
@@ -94,29 +55,107 @@ class CriterionController extends Controller
 
         return redirect()->route('kriteria.get')->with('success', 'Criterion deleted successfully.');
     }
+
     public function calculateAhp()
     {
         $criterias = Criterion::all();
-        
         $n = count($criterias);
-    
-        $matrix = array_fill(0, $n, array_fill(0, $n, 1));
-    
-        for ($i = 0; $i < $n; $i++) {
-            for ($j = $i + 1; $j < $n; $j++) {
-                $weight1 = $criterias[$i]->weight;
-                $weight2 = $criterias[$j]->weight;
-    
-                $matrix[$i][$j] = $weight1 / $weight2;
-                $matrix[$j][$i] = $weight2 / $weight1;
+
+        if ($n === 0) {
+            return redirect()->route('kriteria.get')->with('error', 'No criteria available. Please add criteria first.');
+        }
+
+        $matrix = array();
+        $criteriasIds = $criterias->pluck('id')->all();
+
+        foreach ($criteriasIds as $id1) {
+            $row = array();
+            foreach ($criteriasIds as $id2) {
+                $row[$id2] = 1;
+            }
+            $matrix[$id1] = $row;
+        }
+
+        $ci = 0;
+        $sumColumn = array_fill_keys($criterias->pluck('id')->all(), 0); // Initialize sumColumn with keys from criteria IDs
+
+        foreach ($criterias as $criterion) {
+            foreach ($criterias as $c) {
+                $sumColumn[$criterion->id] += $matrix[$criterion->id][$c->id];
+            }
+            $ci += $sumColumn[$criterion->id] !== 0 ? $sumColumn[$criterion->id] / ($n * $matrix[$criterion->id][$criterion->id]) : 0;
+        }
+
+        $ci = ($ci - $n) / ($n - 1);
+
+        $ri = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
+
+        $cr = $n > 0 ? $ci / $ri[$n] : 0;
+
+        $tolerance = 0.1;
+        $consistency = abs($cr) < $tolerance;
+
+        $criterionWeights = [];
+        foreach ($criterias as $criterion) {
+            $criterionWeights[$criterion->id] = $criterion->weight;
+        }
+
+        $sumWeights = array_sum($criterionWeights);
+        foreach ($criterionWeights as $criterionId => $weight) {
+            $criterionWeights[$criterionId] = $weight / $sumWeights;
+        }
+
+        $finalWeights = [];
+        foreach ($criterias as $criterion) {
+            $sumWeightedMatrixColumn = 0;
+            foreach ($criterias as $c) {
+                $sumWeightedMatrixColumn += $matrix[$criterion->id][$c->id] * $criterionWeights[$c->id];
+            }
+            $finalWeights[$criterion->id] = $sumWeightedMatrixColumn;
+        }
+        $bestAlternative = null;
+        $maxScore = 0;
+        $alternatives = Alternative::all();
+
+        foreach ($alternatives as $alternative) {
+            $score = 0;
+
+            foreach ($criterias as $criterion) {
+                $subCriterias = SubCriterion::where('criterion_id', $criterion->id)->get();
+                $nSub = count($subCriterias);
+
+                $subMatrix = array_fill_keys($subCriterias->pluck('id')->all(), array_fill_keys($subCriterias->pluck('id')->all(), 1));
+                $subWeights = [];
+
+                foreach ($subCriterias as $subCriteria) {
+                    $subWeights[$subCriteria->id] = $subCriteria->weight / $nSub;
+                }
+
+                for ($i = 0; $i < $nSub; $i++) {
+                    for ($j = $i + 1; $j < $nSub; $j++) {
+                        $subCriteriaId1 = $subCriterias[$i]->id;
+                        $subCriteriaId2 = $subCriterias[$j]->id;
+
+                        $subMatrix[$subCriteriaId1][$subCriteriaId2] = $subCriterias[$i]->weight / $subCriterias[$j]->weight;
+                        $subMatrix[$subCriteriaId2][$subCriteriaId1] = $subCriterias[$j]->weight / $subCriterias[$i]->weight;
+                    }
+
+                    $score += $subWeights[$subCriterias[$i]->id] * $subMatrix[$subCriterias[$i]->id][$subCriterias[$i]->id] * $criterionWeights[$criterion->id];
+                }
+            }
+
+            if ($score > $maxScore) {
+                $maxScore = $score;
+                $bestAlternative = $alternative;
             }
         }
-    
-        $consistencyInfo = $this->checkConsistencyIndex($matrix);
-        $ci = $consistencyInfo['ci'];
-        $cr = $consistencyInfo['cr'];
-        $consistency = $consistencyInfo['consistency'];
-    
-        return view('kriteria.calculate_ahp', compact('criterias', 'matrix', 'ci', 'cr', 'consistency'));
+
+        return view('kriteria.calculate_ahp', compact('criterias', 'matrix', 'ci', 'cr', 'consistency', 'bestAlternative', 'finalWeights'));
     }
+
+
+
+
+
+
 }
