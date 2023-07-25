@@ -1,5 +1,3 @@
-<!-- resources/views/alternatif/get.blade.php -->
-
 @extends('layouts.default')
 
 @section('container')
@@ -55,10 +53,11 @@
                                 <td>{{ $alternative->name }}</td>
                                 @foreach ($criteria as $criterion)
                                     @php
-                                        $criterionId = 'criteria_id_' . $criterion->id;
-                                        $subCriterion = \App\Models\SubCriterion::find($alternative->$criterionId);
+                                        $criterionId = $criterion->id;
+                                        $subCriterion = $alternative->subCriteria->where('criterion_id', $criterionId)->first();
+                                        $subCriterionName = $subCriterion ? $subCriterion->name : 'N/A';
                                     @endphp
-                                    <td>{{ $subCriterion->name  }}</td>
+                                    <td>{{ $subCriterionName }}</td>
                                 @endforeach
                                 <td>
                                     <a href="#" class="btn icon btn-sm btn-primary" data-bs-toggle="modal"
@@ -75,6 +74,8 @@
             </div>
         </div>
     </section>
+
+
 
     <!-- Tambah Alternatif Modal -->
     <div class="modal fade" id="addAlternativeModal" tabindex="-1" role="dialog" aria-labelledby="addAlternativeModalLabel"
@@ -96,7 +97,9 @@
                         @foreach ($criteria as $criterion)
                             <div class="form-group">
                                 <label for="{{ 'criteria_id_' . $criterion->id }}">{{ $criterion->name }}</label>
-                                <select class="form-control" id="{{ 'criteria_id_' . $criterion->id }}" name="{{ 'criteria_id_' . $criterion->id }}">
+                                <select class="form-control" id="{{ 'criteria_id_' . $criterion->id }}"
+                                    name="{{ 'criteria_id_' . $criterion->id }}">
+                                    <option value="">Pilih Sub Kriteria</option>
                                     @foreach ($subCriteria as $subCriterion)
                                         <option value="{{ $subCriterion->id }}">{{ $subCriterion->name }}</option>
                                     @endforeach
@@ -113,70 +116,26 @@
         </div>
     </div>
 
-    <!-- Edit Alternatif Modal -->
-    @foreach ($alternatives as $alternative)
+<!-- Edit Alternatif Modal -->
+@foreach ($alternatives as $alternative)
         <div class="modal fade" id="editAlternativeModal{{ $alternative->id }}" tabindex="-1" role="dialog"
             aria-labelledby="editAlternativeModal{{ $alternative->id }}Label" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editAlternativeModal{{ $alternative->id }}Label">Edit Alternatif</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ route('alternatif.update', $alternative->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="edit-nama-alternatif">Nama Alternatif</label>
-                                <input id="edit-nama-alternatif" type="text" name="name" value="{{ $alternative->name }}"
-                                    class="form-control">
-                            </div>
-                            @foreach ($criteria as $criterion)
-                                <div class="form-group">
-                                    <label for="{{ 'edit_criteria_id_' . $criterion->id }}">{{ $criterion->name }}</label>
-                                    <select class="form-control" id="{{ 'edit_criteria_id_' . $criterion->id }}"
-                                        name="{{ 'criteria_id_' . $criterion->id }}">
-                                        @foreach ($subCriteria as $subCriterion)
-                                            <option value="{{ $subCriterion->id }}"
-                                                {{ $subCriterion->id === $alternative->{'criteria_id_' . $criterion->id} ? 'selected' : '' }}>
-                                                {{ $subCriterion->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">Simpan</button>
-                        </div>
-                    </form>
+                    <!-- Modal content for edit goes here -->
                 </div>
             </div>
         </div>
     @endforeach
 
-    <!-- Hapus Alternatif Modal -->
-    @foreach ($alternatives as $alternative)
+
+   <!-- Hapus Alternatif Modal -->
+   @foreach ($alternatives as $alternative)
         <div class="modal fade" id="deleteAlternativeModal{{ $alternative->id }}" tabindex="-1" role="dialog"
             aria-labelledby="deleteAlternativeModal{{ $alternative->id }}Label" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteAlternativeModal{{ $alternative->id }}Label">Hapus Alternatif</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ route('alternatif.delete', $alternative->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <div class="modal-body">
-                            <p>Apakah Anda yakin ingin menghapus alternatif "{{ $alternative->name }}"?</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-danger">Hapus</button>
-                        </div>
-                    </form>
+                    <!-- Modal content for delete goes here -->
                 </div>
             </div>
         </div>

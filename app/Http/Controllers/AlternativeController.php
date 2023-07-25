@@ -2,83 +2,80 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Alternative;
 use App\Models\Criterion;
 use App\Models\SubCriterion;
-use Illuminate\Http\Request;
+use App\Models\AlternativeCriteria;
 
 class AlternativeController extends Controller
 {
-    public function index(Criterion $criterion, SubCriterion $subCriterion)
+    public function index()
     {
-        $criteria = Criterion::all();
-        $subCriteria = SubCriterion::all();
         $alternatives = Alternative::all();
-        return view('alternatif.get', compact('alternatives', 'criteria', 'subCriteria'));
-    }
-
-    public function create(Criterion $criterion, SubCriterion $subCriterion)
-    {
         $criteria = Criterion::all();
         $subCriteria = SubCriterion::all();
 
-        return view('alternatif.create', compact('criteria', 'subCriteria'));
+        return view('alternatif.get', compact('alternatives', 'criteria', 'subCriteria'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        // Validation (if needed)
 
-        $criteriaList = Criterion::all();
-        $criteriaData = [];
+        $alternative = new Alternative();
+        $alternative->name = $request->input('name');
+        $alternative->save();
 
-        foreach ($criteriaList as $criterion) {
-            $subCriterionId = $request['sub_criterion_id_' . $criterion->id];
+        $criteria = Criterion::all();
+        foreach ($criteria as $criterion) {
+            $criterionId = $criterion->id;
+            $subCriterionId = $request->input('criteria_id_' . $criterionId);
 
-            if ($subCriterionId) {
-                $criteriaData['criteria_id_' . $criterion->id] = $subCriterionId;
-            }
+            $alternativeCriterion = new AlternativeCriteria();
+            $alternativeCriterion->alternative_id = $alternative->id;
+            $alternativeCriterion->criterion_id = $criterionId;
+            $alternativeCriterion->sub_criterion_id = $subCriterionId;
+            $alternativeCriterion->save();
         }
 
-        // Merge the criteria data with the rest of the request data
-        $data = array_merge($request->all(), $criteriaData);
-
-        Alternative::create($data);
-
-        return redirect()->route('alternatif.get')->with('success', 'Alternative created successfully.');
+        return redirect()->route('alternatif.get')->with('success', 'Alternative added successfully.');
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        // Validation (if needed)
 
-        // Get the list of criteria dynamically
-        $criteriaList = Criterion::all();
+        $alternative = Alternative::findOrFail($id);
+        $alternative->name = $request->input('name');
+        $alternative->save();
 
-        // Prepare the criteria data for updating
-        $criteriaData = [];
-        foreach ($criteriaList as $criterion) {
-            $criteriaData['criteria_id_' . $criterion->id] = $request['criteria_id_' . $criterion->id];
+        $criteria = Criterion::all();
+        foreach ($criteria as $criterion) {
+            $criterionId = $criterion->id;
+            $subCriterionId = $request->input('criteria_id_' . $criterionId);
+
+            $alternativeCriterion = AlternativeCriteria::where('alternative_id', $id)
+                ->where('criterion_id', $criterionId)
+                ->first();
+
+            if (!$alternativeCriterion) {
+                $alternativeCriterion = new AlternativeCriteria();
+                $alternativeCriterion->alternative_id = $id;
+                $alternativeCriterion->criterion_id = $criterionId;
+            }
+
+            $alternativeCriterion->sub_criterion_id = $subCriterionId;
+            $alternativeCriterion->save();
         }
 
-        // Combine the criteria data with the rest of the request data
-        $data = array_merge($request->all(), $criteriaData);
-
-        $alternative = Alternative::findOrFail($id);
-        $alternative->update($data);
-
-        return redirect()->route('alternatif.get')->with('success', 'Alternative updated successfully.');
+        return redirect()->route('alternatif.index')->with('success', 'Alternative updated successfully.');
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
-        $alternative = Alternative::findOrFail($id);
-        $alternative->delete();
+        Alternative::destroy($id);
 
-        return redirect()->route('alternatif.get')->with('success', 'Alternative deleted successfully.');
+        return redirect()->route('alternatif.delete')->with('success', 'Alternative deleted successfully.');
     }
 }

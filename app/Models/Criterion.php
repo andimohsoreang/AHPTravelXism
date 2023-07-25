@@ -15,4 +15,9 @@ class Criterion extends Model
     {
         return $this->hasMany(SubCriterion::class);
     }
+
+    public function alternatives()
+    {
+        return $this->belongsToMany(Alternative::class)->withPivot('value');
+    }
 }

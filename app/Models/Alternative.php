@@ -9,27 +9,24 @@ class Alternative extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
-    // Define a method to get the dynamically added criteria fields
-    public function getCriteriaFields()
+    public function alternativeCriteria()
     {
-        $criteriaFields = [];
-        $criteriaList = Criterion::all(); // Assuming Criterion is the model for storing criteria
-
-        foreach ($criteriaList as $criterion) {
-            $criteriaFields[] = 'criteria_id_' . $criterion->id;
-        }
-
-        return $criteriaFields;
+        return $this->hasMany(AlternativeCriteria::class);
     }
-    public function subCriterion()
+
+    public function criteria()
     {
-        return $this->belongsTo(SubCriterion::class, 'sub_criterion_id');
+        return $this->hasManyThrough(Criterion::class, AlternativeCriteria::class, 'alternative_id', 'id', 'id', 'criterion_id')->distinct();
     }
-    public function criterion()
+
+    public function subCriteria()
     {
-        return $this->belongsTo(Criterion::class);
+        return $this->hasManyThrough(SubCriterion::class, AlternativeCriteria::class, 'alternative_id', 'id', 'id', 'sub_criterion_id')->distinct();
     }
 }
 
