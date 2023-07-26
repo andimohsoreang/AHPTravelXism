@@ -5,6 +5,7 @@ use App\Http\Controllers\AlternativeController;
 use App\Http\Controllers\CriterionController;
 use App\Http\Controllers\SubCriterionController;
 use App\Http\Controllers\AHPController;
+use App\Http\Controllers\Form;
 
 Route::get('/getkriteria', [CriterionController::class, 'index'])->name('kriteria.get');
 Route::get('/getkriteria/create', [CriterionController::class, 'create'])->name('kriteria.create');
@@ -25,3 +26,5 @@ Route::put('/getalternatif/update/{id}', [AlternativeController::class, 'update'
 Route::delete('/getalternatif/delete/{id}', [AlternativeController::class, 'destroy'])->name('alternatif.delete');
 
 Route::get('/ahp', [AHPController::class, 'calculateAHP'])->name('ahp.result');
+Route::get('/form', [Form::class, 'index'])->name('userform.form');
+Route::post('/form/submit', [Form::class, 'submitForm'])->name('userform.submit');

@@ -7,13 +7,9 @@ use Phpml\Math\Matrix;
 
 class AHPController extends Controller
 {
-    public function calculateAHP()
+    public function calculateAHP($comparisonMatrix)
     {
-        $comparisonMatrix = array(
-            array(1, 0.33333333333333, 0.2),
-            array(3, 1, 0.33333333333333),
-            array(5, 3, 1)
-        );
+       
         $matrixSize = count($comparisonMatrix);
         $priorities = array();
 
@@ -103,7 +99,7 @@ class AHPController extends Controller
             'matrixSize' => $matrixSize
         ];
         
-        return view('ahp.result', $data);
+        return  $data;
         
     }
 }
