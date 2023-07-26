@@ -54,4 +54,10 @@ class SubCriterionController extends Controller
 
         return redirect()->route('kriteria.getsub', $criterion)->with('success', 'Sub Criterion deleted successfully.');
     }
+
+    public function calculateSubCirterion()
+    {
+        $subCriterion = SubCriterion::all();
+        
+    }
 }

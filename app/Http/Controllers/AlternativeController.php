@@ -7,6 +7,7 @@ use App\Models\Alternative;
 use App\Models\Criterion;
 use App\Models\SubCriterion;
 use App\Models\AlternativeCriteria;
+use App\Http\Controllers\AhpController;
 
 class AlternativeController extends Controller
 {
@@ -77,5 +78,17 @@ class AlternativeController extends Controller
         Alternative::destroy($id);
 
         return redirect()->route('alternatif.delete')->with('success', 'Alternative deleted successfully.');
+    }
+
+    public function rank()
+    {
+        $alternatives = Alternative::all()->toArray();
+        $criteria = Criterion::all()->toArray();
+
+        $ahpController = new AhpController();
+        $result = $ahpController->calculateAHP($criteria, $alternatives);
+        $rankedAlternatives = $ahpController->rankAlternatives($result['alternative_scores']);
+
+        return view('alternatif.rank', compact('rankedAlternatives'));
     }
 }

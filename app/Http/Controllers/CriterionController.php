@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\AlternativeController;
 use App\Http\Controllers\SubCriterionController;
+use APP\Models\AlternativeCriteria;
 use App\Models\Criterion;
 use App\Models\Alternative;
 use App\Models\SubCriterion;
@@ -15,6 +16,9 @@ class CriterionController extends Controller
     public function index()
     {
         $criterias = Criterion::all();
+        $cntrl = new CriterionController;
+        $priorities = $cntrl->calculateCriteria();
+
         return view('kriteria.get', compact('criterias'));
     }
 
@@ -56,134 +60,18 @@ class CriterionController extends Controller
         return redirect()->route('kriteria.get')->with('success', 'Criterion deleted successfully.');
     }
 
-    public function calculateAhp()
+    public function calculateCriteria()
     {
-        $criterias = Criterion::all();
-        $n = count($criterias);
+        $criteria = Criterion::all();
+        $criteriaWeights = $criteria->pluck('weight')->toArray();
+        $totalWeight = array_sum($criteriaWeights);
+        $normalizedWeights = array_map(function ($weight) use ($totalWeight) {
+            return $weight / $totalWeight;
+        }, $criteriaWeights);
 
-        if ($n === 0) {
-            return redirect()->route('kriteria.get')->with('error', 'No criteria available. Please add criteria first.');
-        }
-
-        $matrix = array();
-        $criteriasIds = $criterias->pluck('id')->all();
-
-        foreach ($criteriasIds as $id1) {
-            $row = array();
-            foreach ($criteriasIds as $id2) {
-                $row[$id2] = 1;
-            }
-            $matrix[$id1] = $row;
-        }
-
-        $ci = 0;
-        $sumColumn = array_fill_keys($criterias->pluck('id')->all(), 0); // Initialize sumColumn with keys from criteria IDs
-
-        foreach ($criterias as $criterion) {
-            foreach ($criterias as $c) {
-                $sumColumn[$criterion->id] += $matrix[$criterion->id][$c->id];
-            }
-            $ci += $sumColumn[$criterion->id] !== 0 ? $sumColumn[$criterion->id] / ($n * $matrix[$criterion->id][$criterion->id]) : 0;
-        }
-
-        $ci = ($ci - $n) / ($n - 1);
-
-        $ri = [
-            0.0000,
-            0.0000,
-            0.5245,
-            0.8815,
-            1.1086,
-            1.2479,
-            1.3417,
-            1.4056,
-            1.4499,
-            1.4854,
-            1.5141,
-            1.5365,
-            1.5551,
-            1.5713,
-            1.5838,
-            1.5978,
-            1.6086,
-            1.6181,
-            1.6265,
-            1.6341,
-            1.6409,
-            1.6470,
-            1.6526,
-            1.6577,
-            1.6624,
-            1.6667,
-            1.6706,
-            1.6743,
-            1.6777,
-            1.6809,
-            1.6839,
-            1.6867,
-            1.6893,
-            1.6917,
-            1.6962
-        ];
-
-        $cr = $n > 0 ? $ci / $ri[$n] : 0;
-
-        $tolerance = 0.1;
-        $consistency = abs($cr) < $tolerance;
-
-        $criterionWeights = [];
-        foreach ($criterias as $criterion) {
-            $criterionWeights[$criterion->id] = $criterion->weight;
-        }
-
-        $sumWeights = array_sum($criterionWeights);
-        foreach ($criterionWeights as $criterionId => $weight) {
-            $criterionWeights[$criterionId] = $weight / $sumWeights;
-        }
-
-        $finalWeights = [];
-        foreach ($criterias as $criterion) {
-            $sumWeightedMatrixColumn = 0;
-            foreach ($criterias as $c) {
-                $sumWeightedMatrixColumn += $matrix[$criterion->id][$c->id] * $criterionWeights[$c->id];
-            }
-            $finalWeights[$criterion->id] = $sumWeightedMatrixColumn;
-        }
-        $bestAlternative = null;
-        $maxScore = 0;
-        $alternatives = Alternative::all();
-
-        foreach ($alternatives as $alternative) {
-            $score = 0;
-
-            foreach ($criterias as $criterion) {
-                $subCriterias = SubCriterion::where('criterion_id', $criterion->id)->get();
-                $nSub = count($subCriterias);
-                $subMatrix = array_fill_keys($subCriterias->pluck('id')->all(), array_fill_keys($subCriterias->pluck('id')->all(), 1));
-                $subWeights = [];
-
-                foreach ($subCriterias as $subCriteria) {
-                    $subWeights[$subCriteria->id] = $subCriteria->weight / $nSub;
-                }
-
-                for ($i = 0; $i < $nSub; $i++) {
-                    for ($j = $i + 1; $j < $nSub; $j++) {
-                        $subCriteriaId1 = $subCriterias[$i]->id;
-                        $subCriteriaId2 = $subCriterias[$j]->id;
-
-                        $subMatrix[$subCriteriaId1][$subCriteriaId2] = $subCriterias[$i]->weight / $subCriterias[$j]->weight;
-                        $subMatrix[$subCriteriaId2][$subCriteriaId1] = $subCriterias[$j]->weight / $subCriterias[$i]->weight;
-                    }
-
-                    $score += $subWeights[$subCriterias[$i]->id] * $subMatrix[$subCriterias[$i]->id][$subCriterias[$i]->id] * $criterionWeights[$criterion->id];
-                }
-            }
-
-            if ($score > $maxScore) {
-                $maxScore = $score;
-                $bestAlternative = $alternative;
-            }
-        }
-        return view('kriteria.calculate_ahp', compact('criterias', 'matrix', 'ci', 'cr', 'consistency', 'bestAlternative', 'finalWeights'));
+        $ahpController = new AHPController();
+        $priorities = $ahpController->calculateAHP($normalizedWeights);
+        //dd($priorities);
+        return $priorities;
     }
 }

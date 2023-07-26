@@ -11,6 +11,11 @@ class SubCriterion extends Model
 
     protected $fillable = ['name', 'weight', 'criterion_id'];
 
+    public function subCriterion()
+    {
+        return $this->belongsTo(SubCriterion::class);
+    }
+
     public function criterion()
     {
         return $this->belongsTo(Criterion::class);

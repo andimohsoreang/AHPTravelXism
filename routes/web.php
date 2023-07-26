@@ -23,3 +23,5 @@ Route::get('/getalternatif/create', [AlternativeController::class, 'create'])->n
 Route::post('/getalternatif/store', [AlternativeController::class, 'store'])->name('alternatif.store');
 Route::put('/getalternatif/update/{id}', [AlternativeController::class, 'update'])->name('alternatif.update');
 Route::delete('/getalternatif/delete/{id}', [AlternativeController::class, 'destroy'])->name('alternatif.delete');
+Route::get('/ahp-ranking', [CriterionController::class, 'ahpRanking'])->name('ahp-ranking');
+Route::get('/alternatif/rank', [AlternativeController::class, 'rank'])->name('alternatif.rank');
