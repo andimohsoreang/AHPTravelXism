@@ -44,7 +44,6 @@ use App\Http\Controllers\SubCriterionController;
                                 <th>No</th>
                                 <th>Nama Kriteria</th>
                                 <th>Nama Sub Kriteria</th>
-                                <th>Bobot</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -54,7 +53,6 @@ use App\Http\Controllers\SubCriterionController;
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $subCriteria->criterion->name }}</td>
                                     <td>{{ $subCriteria->name }}</td>
-                                    <td>{{ $subCriteria->weight }}</td>
                                     <td>
                                         <a href="#" class="btn icon btn-sm btn-primary" data-bs-toggle="modal"
                                             data-bs-target="#updateSubCriteriaModal{{ $subCriteria->id }}"><i
@@ -97,10 +95,6 @@ use App\Http\Controllers\SubCriterionController;
                             <label for="nama-sub-kriteria">Nama Sub Kriteria</label>
                             <input id="nama-sub-kriteria" type="text" name="name" placeholder="Nama Sub Kriteria" class="form-control">
                         </div>
-                        <div class="form-group">
-                            <label for="bobot">Bobot</label>
-                            <input id="bobot" type="number" name="weight" placeholder="Masukan Bobot Sub Kriteria" class="form-control">
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -142,12 +136,6 @@ use App\Http\Controllers\SubCriterionController;
                                 <input id="nama-sub-kriteria{{ $subCriteria->id }}" type="text" name="name"
                                     placeholder="Nama Sub Kriteria" class="form-control"
                                     value="{{ $subCriteria->name }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="bobot{{ $subCriteria->id }}">Bobot</label>
-                                <input id="bobot{{ $subCriteria->id }}" type="number" name="weight"
-                                    placeholder="Masukkan Bobot Sub Kriteria" class="form-control"
-                                    value="{{ $subCriteria->weight }}">
                             </div>
                         </div>
                         <div class="modal-footer">

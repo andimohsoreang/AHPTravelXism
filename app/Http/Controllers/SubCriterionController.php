@@ -25,7 +25,6 @@ class SubCriterionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'weight' => 'required|numeric',
         ]);
 
         $subCriterion = SubCriterion::create($request->all());
@@ -37,7 +36,6 @@ class SubCriterionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'weight' => 'required|numeric',
         ]);
 
         $subCriterion = SubCriterion::findOrFail($id);
@@ -58,6 +56,5 @@ class SubCriterionController extends Controller
     public function calculateSubCirterion()
     {
         $subCriterion = SubCriterion::all();
-        
     }
 }

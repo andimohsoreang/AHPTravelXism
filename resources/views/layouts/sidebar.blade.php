@@ -75,12 +75,6 @@
                         <span>Pembobotan</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
-                    <a href="/getalternatif" class="sidebar-link">
-                        <i class="bi bi-grid-fill"></i>
-                        <span>Pembobotan</span>
-                    </a>
-                </li>
                 <li class="sidebar-title">Pengaturan</li>
 
                 <li class="sidebar-item">

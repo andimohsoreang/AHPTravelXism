@@ -7,94 +7,103 @@ use Phpml\Math\Matrix;
 
 class AHPController extends Controller
 {
-    
-    public function calculateAHP($criteriaWeights)
+    public function calculateAHP()
     {
-        // Memastikan bobot kriteria valid
-        if (!$this->areCriteriaWeightsValid($criteriaWeights)) {
-            return response()->json(['error' => 'Invalid criteria weights. Please make sure the sum of weights is equal to 1.'], 400);
-        }
+        $comparisonMatrix = array(
+            array(1, 0.33333333333333, 0.2),
+            array(3, 1, 0.33333333333333),
+            array(5, 3, 1)
+        );
+        $matrixSize = count($comparisonMatrix);
+        $priorities = array();
 
-        // Mengonversi array dengan indeks numerik menjadi array asosiatif dengan indeks yang teratur (0, 1, 2, dst.)
-        $criteriaWeights = array_values($criteriaWeights);
+        $sumColumns = array_map(function () {
+            return 0;
+        }, $comparisonMatrix);
 
-        // Lakukan perhitungan AHP
-        $priorities = $this->calculatePriorities($criteriaWeights);
-
-        return $priorities;
-    }
-
-
-    // Fungsi untuk memeriksa apakah bobot kriteria valid
-    private function areCriteriaWeightsValid($criteriaWeights)
-    {
-        // Memastikan jumlah bobot adalah 1 (dengan toleransi 1e-6 karena keterbatasan presisi float)
-        $totalWeight = array_sum($criteriaWeights);
-        if (abs(1 - $totalWeight) > 1e-6) {
-            return false;
-        }
-
-        return true;
-    }
-
-    // Fungsi untuk menghitung prioritas berdasarkan bobot kriteria
-    private function calculatePriorities($criteriaWeights)
-    {
-        $numCriteria = count($criteriaWeights);
-
-        // Normalisasi bobot kriteria
-        $normalizedWeights = array_map(function ($weight) use ($numCriteria) {
-            return $weight / $numCriteria;
-        }, $criteriaWeights);
-
-        return $normalizedWeights;
-    }
-
-    // Fungsi untuk menghitung nilai prioritas menggunakan metode AHP
-    private function calculateAHPValues($pairwiseMatrix)
-    {
-        $matrix = new Matrix($pairwiseMatrix);
-
-        // Step 1: Normalisasi matriks berdasarkan jumlah kolom
-        $normalizedMatrix = $this->normalizeMatrix($matrix);
-
-        // Step 2: Hitung nilai rata-rata setiap baris normalisasi
-        $averageRowValues = $this->calculateAverageRowValues($normalizedMatrix);
-
-        // Step 3: Hitung nilai prioritas akhir sebagai rata-rata nilai rata-rata setiap baris normalisasi
-        $priorities = array_sum($averageRowValues) / count($averageRowValues);
-
-        return $priorities;
-    }
-
-    // Fungsi untuk melakukan normalisasi matriks berdasarkan jumlah kolom
-    private function normalizeMatrix($matrix)
-    {
-        $rowCount = $matrix->getRowCount();
-        $columnCount = $matrix->getColumnCount();
-        $normalizedMatrix = [];
-
-        for ($i = 0; $i < $rowCount; $i++) {
-            $row = [];
-            for ($j = 0; $j < $columnCount; $j++) {
-                $row[] = $matrix[$i][$j] / array_sum($matrix->getColumnValues($j));
+        for ($i = 0; $i < $matrixSize; $i++) {
+            for ($j = 0; $j < $matrixSize; $j++) {
+                $sumColumns[$j] += $comparisonMatrix[$i][$j];
             }
-            $normalizedMatrix[] = $row;
         }
 
-        return new Matrix($normalizedMatrix);
-    }
 
-    // Fungsi untuk menghitung nilai rata-rata setiap baris matriks
-    private function calculateAverageRowValues($matrix)
-    {
-        $rowCount = $matrix->getRowCount();
-        $averageRowValues = [];
-
-        for ($i = 0; $i < $rowCount; $i++) {
-            $averageRowValues[] = array_sum($matrix->getRowValues($i)) / $rowCount;
+        for ($i = 0; $i < $matrixSize; $i++) {
+            for ($j = 0; $j < $matrixSize; $j++) {
+                $comparisonMatrix[$i][$j] /= $sumColumns[$j];
+            }
         }
 
-        return $averageRowValues;
+        for ($i = 0; $i < $matrixSize; $i++) {
+            $priorities[$i] = array_sum($comparisonMatrix[$i]) / $matrixSize;
+        }
+
+        $sumPriorities = array_sum($priorities);
+        for ($i = 0; $i < $matrixSize; $i++) {
+            $priorities[$i] /= $sumPriorities;
+        }
+
+        $eigenValue = array();
+        $sumSize = count($sumColumns);
+        for ($i = 0; $i < $sumSize; $i++) {
+            $eigenValue[$i] = $priorities[$i] * $sumColumns[$i];
+        }
+
+        $SumeigenValue = array_sum($eigenValue);
+        $CI = ($SumeigenValue-$matrixSize)/($matrixSize-1);
+
+        $IR = array(
+            0 => 0.0000,
+            1 => 0.0000,
+            2 => 0.5245,
+            3 => 0.8815,
+            4 => 1.1086,
+            5 => 1.2479,
+            6 => 1.3417,
+            7 => 1.4056,
+            8 => 1.4499,
+            9 => 1.4854,
+            10 => 1.5141,
+            11 => 1.5365,
+            12 => 1.5551,
+            13 => 1.5713,
+            14 => 1.5838,
+            15 => 1.5978,
+            16 => 1.6086,
+            17 => 1.6181,
+            18 => 1.6265,
+            19 => 1.6341,
+            20 => 1.6409,
+            21 => 1.6470,
+            22 => 1.6526,
+            23 => 1.6577,
+            24 => 1.6624,
+            25 => 1.6667,
+            26 => 1.6706,
+            27 => 1.6743,
+            28 => 1.6777,
+            29 => 1.6809,
+            30 => 1.6839,
+            31 => 1.6867,
+            32 => 1.6893,
+            33 => 1.6917,
+            34 => 1.6962,
+        );
+        // Assuming the rest of the code is unchanged
+        $RC = $IR[$matrixSize - 1];
+        $CR = $CI / $RC;
+        
+        $data = [
+            'priorities' => $priorities,
+            'eigenValue' => $eigenValue,
+            'CR' => $CR,
+            'IR' => $IR[$matrixSize - 1],
+            'RC' => $RC,
+            'matrix' => $comparisonMatrix,
+            'matrixSize' => $matrixSize
+        ];
+        
+        return view('ahp.result', $data);
+        
     }
 }

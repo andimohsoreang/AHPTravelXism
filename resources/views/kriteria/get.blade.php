@@ -43,7 +43,6 @@ use App\Http\Controllers\CriterionController;
                             <tr>
                                 <th>No</th>
                                 <th>Nama Kriteria</th>
-                                <th>Bobot</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -52,7 +51,6 @@ use App\Http\Controllers\CriterionController;
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $criteria->name }}</td>
-                                    <td>{{ $criteria->weight }}</td>
                                     <td>
                                         <a href="#" class="btn icon btn-sm btn-primary" data-bs-toggle="modal"
                                             data-bs-target="#updateCriteriaModal{{ $criteria->id }}"><i
@@ -87,11 +85,6 @@ use App\Http\Controllers\CriterionController;
                             <input id="nama-kriteria" type="text" name="name" placeholder="Nama Kriteria"
                                 class="form-control">
                         </div>
-                        <div class="form-group">
-                            <label for="bobot">Bobot</label>
-                            <input id="bobot" type="number" name="weight" placeholder="Masukan Bobot Kriteria"
-                                class="form-control">
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -121,12 +114,6 @@ use App\Http\Controllers\CriterionController;
                                 <input id="nama-kriteria{{ $criteria->id }}" type="text" name="name"
                                     placeholder="Nama Kriteria" class="form-control"
                                     value="{{ $criteria->name }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="bobot{{ $criteria->id }}">Bobot</label>
-                                <input id="bobot{{ $criteria->id }}" type="number" name="weight"
-                                    placeholder="Masukkan Bobot Kriteria" class="form-control"
-                                    value="{{ $criteria->weight }}">
                             </div>
                         </div>
                         <div class="modal-footer">

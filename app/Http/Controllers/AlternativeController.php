@@ -22,8 +22,6 @@ class AlternativeController extends Controller
 
     public function store(Request $request)
     {
-        // Validation (if needed)
-
         $alternative = new Alternative();
         $alternative->name = $request->input('name');
         $alternative->save();
@@ -82,13 +80,6 @@ class AlternativeController extends Controller
 
     public function rank()
     {
-        $alternatives = Alternative::all()->toArray();
-        $criteria = Criterion::all()->toArray();
-
-        $ahpController = new AhpController();
-        $result = $ahpController->calculateAHP($criteria, $alternatives);
-        $rankedAlternatives = $ahpController->rankAlternatives($result['alternative_scores']);
-
-        return view('alternatif.rank', compact('rankedAlternatives'));
+       
     }
 }

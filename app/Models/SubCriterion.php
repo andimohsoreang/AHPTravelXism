@@ -9,7 +9,7 @@ class SubCriterion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'weight', 'criterion_id'];
+    protected $fillable = ['name', 'criterion_id'];
 
     public function subCriterion()
     {

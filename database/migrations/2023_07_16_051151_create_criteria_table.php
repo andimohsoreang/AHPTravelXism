@@ -16,7 +16,6 @@ class CreateCriteriaTable extends Migration
         Schema::create('criteria', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->decimal('weight', 8, 5);
             $table->timestamps();
         });
     }

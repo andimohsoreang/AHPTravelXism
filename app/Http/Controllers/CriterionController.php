@@ -16,9 +16,7 @@ class CriterionController extends Controller
     public function index()
     {
         $criterias = Criterion::all();
-        $cntrl = new CriterionController;
-        $priorities = $cntrl->calculateCriteria();
-
+       
         return view('kriteria.get', compact('criterias'));
     }
 
@@ -31,7 +29,6 @@ class CriterionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'weight' => 'required|numeric',
         ]);
 
         $criterion = Criterion::create($request->all());
@@ -43,7 +40,6 @@ class CriterionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'weight' => 'required|numeric',
         ]);
 
         $criterion = Criterion::findOrFail($id);
@@ -62,16 +58,6 @@ class CriterionController extends Controller
 
     public function calculateCriteria()
     {
-        $criteria = Criterion::all();
-        $criteriaWeights = $criteria->pluck('weight')->toArray();
-        $totalWeight = array_sum($criteriaWeights);
-        $normalizedWeights = array_map(function ($weight) use ($totalWeight) {
-            return $weight / $totalWeight;
-        }, $criteriaWeights);
-
-        $ahpController = new AHPController();
-        $priorities = $ahpController->calculateAHP($normalizedWeights);
-        //dd($priorities);
-        return $priorities;
+      
     }
 }

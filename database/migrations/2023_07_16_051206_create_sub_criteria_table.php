@@ -16,7 +16,6 @@ class CreateSubCriteriaTable extends Migration
         Schema::create('sub_criteria', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->decimal('weight', 8, 5);
             $table->unsignedBigInteger('criterion_id');
             $table->foreign('criterion_id')->references('id')->on('criteria')->onDelete('cascade');
             $table->timestamps();
