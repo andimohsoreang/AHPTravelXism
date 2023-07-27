@@ -95,22 +95,29 @@ class Form extends Controller
             $SubKriteria_Prioritas[$index] = $subKirteria['priorities'];
         }
 
-        dd($allAlternative);
-
-
-        foreach ($allAlternative as $key_all => $alt) {
-            foreach ($alt as $key => $items) {
-                $rankAlternative[$key_all - 1][$key] = $SubKriteria_Prioritas[($items->criterion_id) - 1][($items->sub_criterion_id) - 1] * $Kriteria_Prioritas[($items->criterion_id) - 1];
+        $new_Subkriteria = [];
+        $nilai = 0;
+        foreach ($subKirteriaArray as $key => $sub) {
+            foreach ($sub['priorities'] as $key => $value) {
+                $new_Subkriteria[$nilai] = $value;
+                $nilai = $nilai + 1;
             }
         }
 
-        dd($rankAlternative);
+        foreach ($allAlternative as $key_all => $alt) {
+            foreach ($alt as $key => $items) {
+                $rankAlternative[$key_all - 1][$key] = $new_Subkriteria[($items->sub_criterion_id) - 1] * $Kriteria_Prioritas[($items->criterion_id) - 1];
+            }
+        }
 
-        dd($SubKriteria_Prioritas);
+        $data = [
+            'HasilKriteria' => $HasilKriteria,
+            'Hasil_SubKriteria' => $subKirteriaArray,
+            'Ranking' => $rankAlternative
+        ];
 
-        dd($alternativeKriteria);
-        dd($subKirteriaArray);
-        dd($HasilKriteria);
+        dd($data);
+        
     }
 
 }
