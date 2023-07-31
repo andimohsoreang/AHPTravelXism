@@ -115,9 +115,7 @@ class Form extends Controller
             'Hasil_SubKriteria' => $subKirteriaArray,
             'Ranking' => $rankAlternative
         ];
-
         dd($data);
-        
     }
 
 }

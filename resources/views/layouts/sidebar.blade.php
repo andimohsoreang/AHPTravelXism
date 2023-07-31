@@ -3,7 +3,8 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a href="index.html"><img src="{{ asset('./assets/compiled/svg/logo.svg') }}" alt="Logo" srcset="" /></a>
+                    <a href="index.html"><img src="{{ asset('./assets/compiled/svg/logo.svg') }}" alt="Logo"
+                            srcset="" /></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2 align-items-center mt-2">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -68,7 +69,7 @@
                         <span>Alternatif</span>
                     </a>
                 </li>
-                 <li class="sidebar-title">AHP</li>
+                <li class="sidebar-title">AHP</li>
                 <li class="sidebar-item">
                     <a href="/getalternatif" class="sidebar-link">
                         <i class="bi bi-grid-fill"></i>
@@ -83,6 +84,16 @@
                         <span>Pengaturan Akun</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <form action="{{ route('auth.logout') }}" method="post" class="sidebar-link">
+                        @csrf
+                        <button type="submit" class="btn btn-link">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </li>
+              
             </ul>
         </div>
     </div>
