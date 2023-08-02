@@ -30,10 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/getalternatif/create', [AlternativeController::class, 'create'])->name('alternatif.create');
     Route::post('/getalternatif/store', [AlternativeController::class, 'store'])->name('alternatif.store');
     Route::put('/getalternatif/update/{id}', [AlternativeController::class, 'update'])->name('alternatif.update');
-    Route::delete('/getalternatif/delete/{id}', [AlternativeController::class, 'destroy'])->name('alternatif.delete');
+    Route::delete('/getalternatif/delete/{id}', [AlternativeController::class, 'delete'])->name('alternatif.delete');
 
-    Route::get('/ahp', [AHPController::class, 'calculateAHP'])->name('ahp.result');
+    Route::get('/form/ahp', [Form::class, 'get'])->name('ahp.result');
     Route::get('/form', [Form::class, 'index'])->name('userform.form');
     Route::post('/form/submit', [Form::class, 'submitForm'])->name('userform.submit');
-    Route::get('/home', [DashboardController::class, 'index'])->name('home');
+    Route::post('/result', [Form::class, ''])->name('alternatif.rank');
+    Route::get('/', [DashboardController::class, 'index'])->name('home');
 });

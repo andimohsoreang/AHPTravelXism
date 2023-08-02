@@ -79,9 +79,9 @@
                 <li class="sidebar-title">Pengaturan</li>
 
                 <li class="sidebar-item">
-                    <a href="https://zuramai.github.io/mazer/docs" class="sidebar-link">
+                    <a href="/form" class="sidebar-link">
                         <i class="bi bi-life-preserver"></i>
-                        <span>Pengaturan Akun</span>
+                        <span>Form</span>
                     </a>
                 </li>
                 <li class="sidebar-item">

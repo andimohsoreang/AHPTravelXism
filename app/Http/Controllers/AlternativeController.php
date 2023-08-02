@@ -68,14 +68,14 @@ class AlternativeController extends Controller
             $alternativeCriterion->save();
         }
 
-        return redirect()->route('alternatif.index')->with('success', 'Alternative updated successfully.');
+        return redirect()->route('alternatif.get')->with('success', 'Alternative updated successfully.');
     }
 
     public function delete($id)
     {
         Alternative::destroy($id);
 
-        return redirect()->route('alternatif.delete')->with('success', 'Alternative deleted successfully.');
+        return redirect()->route('alternatif.get')->with('success', 'Alternative deleted successfully.');
     }
 
     public function rank()
