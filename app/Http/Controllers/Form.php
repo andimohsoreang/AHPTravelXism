@@ -178,8 +178,14 @@ class Form extends Controller
             $subCriteria = SubCriterion::all();
             $data = session()->get('dt');
 
-            // Tampilkan halaman hasil perhitungan AHP dengan data yang telah diambil
-            return view('ahp.result', compact('data', 'criteria', 'subCriteria'));
+            if ($data != null) {
+                // Tampilkan halaman hasil perhitungan AHP dengan data yang telah diambil
+                return view('ahp.result', compact('data', 'criteria', 'subCriteria'));
+            } else {
+                return redirect()->back()->with('error', $errorMessage);
+
+            }
+
         } catch (\Exception $e) {
             $errorMessage = 'Terjadi error: ' . $e->getMessage();
             return redirect()->back()->with('error', $errorMessage);

@@ -16,13 +16,20 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Ranking</th>
                                     <th>Alternative</th>
+                                    <th>Score</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $i = 1;
+                                @endphp
                                 @foreach ($data['SumRank'] as $key => $rank)
                                     <tr>
+                                        <td>{{ $i++ }}</td>
                                         <td>{{ $key }}</td>
+                                        <td>{{ $rank }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

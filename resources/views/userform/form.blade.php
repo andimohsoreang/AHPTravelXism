@@ -17,7 +17,7 @@
     <script src="assets/static/js/initTheme.js"></script>
     <nav class="navbar navbar-light">
         <div class="container d-block">
-            <a class="navbar-brand ms-4" href="#">
+            <a class="navbar-brand ms-4" href="/">
                 <img src="{{ url('assets/static/images/logo.png') }}" />
             </a>
         </div>

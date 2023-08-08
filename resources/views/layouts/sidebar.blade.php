@@ -73,7 +73,7 @@
                 <li class="sidebar-item">
                     <a href="/form/ahp" class="sidebar-link">
                         <i class="bi bi-grid-fill"></i>
-                        <span>Pembobotan</span>
+                        <span>Hasil</span>
                     </a>
                 </li>
                 <li class="sidebar-title">Pengaturan</li>
