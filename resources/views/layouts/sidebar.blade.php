@@ -84,12 +84,11 @@
                         <span>Form</span>
                     </a>
                 </li>
-                <li class="sidebar-item">
+                {{-- <li class="sidebar-item"> --}}
                     <form action="{{ route('auth.logout') }}" method="post" class="sidebar-link">
                         @csrf
-                        <button type="submit" class="btn btn-link">
-                            <i class="bi bi-box-arrow-right"></i>
-                            <span>Logout</span>
+                        <button type="submit" class="btn btn-danger">
+                            <span><strong>Logout</strong></span>
                         </button>
                     </form>
                 </li>
