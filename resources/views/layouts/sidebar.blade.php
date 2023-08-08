@@ -71,7 +71,7 @@
                 </li>
                 <li class="sidebar-title">AHP</li>
                 <li class="sidebar-item">
-                    <a href="/getalternatif" class="sidebar-link">
+                    <a href="/form/ahp" class="sidebar-link">
                         <i class="bi bi-grid-fill"></i>
                         <span>Pembobotan</span>
                     </a>

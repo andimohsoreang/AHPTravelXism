@@ -172,12 +172,18 @@ class Form extends Controller
      */
     public function get()
     {
-        // Ambil data kriteria, subkriteria, dan hasil perhitungan AHP dari sesi
-        $criteria = Criterion::all();
-        $subCriteria = SubCriterion::all();
-        $data = session()->get('dt');
+        try {
+            // Ambil data kriteria, subkriteria, dan hasil perhitungan AHP dari sesi
+            $criteria = Criterion::all();
+            $subCriteria = SubCriterion::all();
+            $data = session()->get('dt');
 
-        // Tampilkan halaman hasil perhitungan AHP dengan data yang telah diambil
-        return view('ahp.result', compact('data', 'criteria', 'subCriteria'));
+            // Tampilkan halaman hasil perhitungan AHP dengan data yang telah diambil
+            return view('ahp.result', compact('data', 'criteria', 'subCriteria'));
+        } catch (\Exception $e) {
+            $errorMessage = 'Terjadi error: ' . $e->getMessage();
+            return redirect()->back()->with('error', $errorMessage);
+        }
+
     }
 }
