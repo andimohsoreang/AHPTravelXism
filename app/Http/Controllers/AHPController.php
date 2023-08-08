@@ -60,15 +60,51 @@ class AHPController extends Controller
         $CI = ($SumeigenValue - $matrixSize) / ($matrixSize - 1);
 
         // Langkah 8: Tabel Inconsistency Ratio (IR)
-        $IR = array(
-            // ... (nilai-nilai tabel IR)
-        );
+        $IR = [
+            0 => 0.0000,
+            1 => 0.0000,
+            2 => 0.5245,
+            3 => 0.8815,
+            4 => 1.1086,
+            5 => 1.2479,
+            6 => 1.3417,
+            7 => 1.4056,
+            8 => 1.4499,
+            9 => 1.4854,
+            10 => 1.5141,
+            11 => 1.5365,
+            12 => 1.5551,
+            13 => 1.5713,
+            14 => 1.5838,
+            15 => 1.5978,
+            16 => 1.6086,
+            17 => 1.6181,
+            18 => 1.6265,
+            19 => 1.6341,
+            20 => 1.6409,
+            21 => 1.6470,
+            22 => 1.6526,
+            23 => 1.6577,
+            24 => 1.6624,
+            25 => 1.6667,
+            26 => 1.6706,
+            27 => 1.6743,
+            28 => 1.6777,
+            29 => 1.6809,
+            30 => 1.6839,
+            31 => 1.6867,
+            32 => 1.6893,
+            33 => 1.6917,
+            34 => 1.6962,
+            35 => 1.6086
+        ];
+        
 
         // Langkah 9: Hitung Random Consistency Index (RC)
         $RC = $IR[$matrixSize - 1];
 
         // Langkah 10: Hitung Consistency Ratio (CR)
-        if ($RC != 0 || $CI != 0) {
+        if ($RC != 0 && $CI != 0) {
             $CR = $CI / $RC;
         } else {
             $CR = 0;

@@ -50,113 +50,119 @@ class Form extends Controller
      */
     public function submitForm(Request $request)
     {
-        // Ambil semua data formulir yang di-submit
-        $formData = $request->all();
+        try {
+            // Ambil semua data formulir yang di-submit
+            $formData = $request->all();
 
-        // Inisialisasi matriks perbandingan kriteria
-        $matriksKriteria = [];
-        $ahpController = new AHPController;
-        $alternative = Alternative::all();
-        $alternativeKriteria = AlternativeCriteria::all();
+            // Inisialisasi matriks perbandingan kriteria
+            $matriksKriteria = [];
+            $ahpController = new AHPController;
+            $alternative = Alternative::all();
+            $alternativeKriteria = AlternativeCriteria::all();
 
-        // Membentuk matriks perbandingan kriteria dari data formulir
-        foreach ($formData as $key => $value) {
-            if (str_contains($key, 'criteriaSelect')) {
-                $two = substr($key, -2);
-                $ini = str_split($two);
-                $i = (int) $ini[0];
-                $j = (int) $ini[1];
-                $matriksKriteria[$i][$j] = (int) $value;
-                $matriksKriteria[$j][$i] = (int) $value;
+            // Membentuk matriks perbandingan kriteria dari data formulir
+            foreach ($formData as $key => $value) {
+                if (str_contains($key, 'criteriaSelect')) {
+                    $two = substr($key, -2);
+                    $ini = str_split($two);
+                    $i = (int) $ini[0];
+                    $j = (int) $ini[1];
+                    $matriksKriteria[$i][$j] = (int) $value;
+                    $matriksKriteria[$j][$i] = (int) $value;
+                }
             }
-        }
 
-        // Memastikan nilai diagonal pada matriks kriteria adalah 1 (nilai perbandingan diri sendiri adalah 1)
-        for ($i = 0; $i < count($matriksKriteria); $i++) {
-            $matriksKriteria[$i][$i] = 1;
-        }
-
-        // Hitung hasil AHP untuk kriteria
-        $HasilKriteria = $ahpController->calculateAHP($matriksKriteria);
-
-        // Inisialisasi array untuk menyimpan matriks perbandingan subkriteria
-        $subMatriksKriteriaArray = [];
-
-        // Membentuk matriks perbandingan subkriteria dari data formulir
-        foreach ($formData as $key => $value) {
-            if (str_contains($key, 'subcriteria')) {
-                $two = substr($key, -2);
-                $first = substr($key, 0, 1);
-                $ini = str_split($two);
-                $i = (int) $ini[0];
-                $j = (int) $ini[1];
-                $subMatriksKriteriaArray[$first][$i][$j] = (int) $value;
-                $subMatriksKriteriaArray[$first][$j][$i] = (int) $value;
+            // Memastikan nilai diagonal pada matriks kriteria adalah 1 (nilai perbandingan diri sendiri adalah 1)
+            for ($i = 0; $i < count($matriksKriteria); $i++) {
+                $matriksKriteria[$i][$i] = 1;
             }
-        }
 
-        // Memastikan nilai diagonal pada matriks subkriteria adalah 1 (nilai perbandingan diri sendiri adalah 1)
-        foreach ($subMatriksKriteriaArray as $index => $subMatrix) {
-            for ($i = 0; $i < count($subMatrix); $i++) {
-                $subMatriksKriteriaArray[$index][$i][$i] = 1;
+            // Hitung hasil AHP untuk kriteria
+            $HasilKriteria = $ahpController->calculateAHP($matriksKriteria);
+
+            // Inisialisasi array untuk menyimpan matriks perbandingan subkriteria
+            $subMatriksKriteriaArray = [];
+
+            // Membentuk matriks perbandingan subkriteria dari data formulir
+            foreach ($formData as $key => $value) {
+                if (str_contains($key, 'subcriteria')) {
+                    $two = substr($key, -2);
+                    $first = substr($key, 0, 1);
+                    $ini = str_split($two);
+                    $i = (int) $ini[0];
+                    $j = (int) $ini[1];
+                    $subMatriksKriteriaArray[$first][$i][$j] = (int) $value;
+                    $subMatriksKriteriaArray[$first][$j][$i] = (int) $value;
+                }
             }
-        }
 
-        // Hitung hasil AHP untuk subkriteria
-        $subKirteriaArray = [];
-        foreach ($subMatriksKriteriaArray as $index => $subKirteria) {
-            $subKirteriaArray[$index] = $ahpController->calculateAHP($subKirteria);
-        }
-
-        // Menghitung skor alternatif berdasarkan hasil AHP untuk kriteria dan subkriteria
-        $countAlternative = count($alternative);
-        $allAlternative = [];
-        for ($i = 1; $i <= $countAlternative; $i++) {
-            $allAlternative[$i] = $alternativeCriteria = AlternativeCriteria::where('alternative_id', $i)->get();
-        }
-
-        $rankAlternative = [];
-        $Kriteria_Prioritas = $HasilKriteria['priorities'];
-        $SubKriteria_Prioritas = [];
-        foreach ($subKirteriaArray as $index => $subKirteria) {
-            $SubKriteria_Prioritas[$index] = $subKirteria['priorities'];
-        }
-
-        $new_Subkriteria = [];
-        $nilai = 0;
-        foreach ($subKirteriaArray as $key => $sub) {
-            foreach ($sub['priorities'] as $key => $value) {
-                $new_Subkriteria[$nilai] = $value;
-                $nilai = $nilai + 1;
+            // Memastikan nilai diagonal pada matriks subkriteria adalah 1 (nilai perbandingan diri sendiri adalah 1)
+            foreach ($subMatriksKriteriaArray as $index => $subMatrix) {
+                for ($i = 0; $i < count($subMatrix); $i++) {
+                    $subMatriksKriteriaArray[$index][$i][$i] = 1;
+                }
             }
-        }
 
-        foreach ($allAlternative as $key_all => $alt) {
-            foreach ($alt as $key => $items) {
-                $rankAlternative[$key_all - 1][$key] = $new_Subkriteria[($items->sub_criterion_id) - 1] * $Kriteria_Prioritas[($items->criterion_id) - 1];
+            // Hitung hasil AHP untuk subkriteria
+            $subKirteriaArray = [];
+            foreach ($subMatriksKriteriaArray as $index => $subKirteria) {
+                $subKirteriaArray[$index] = $ahpController->calculateAHP($subKirteria);
             }
+
+            // Menghitung skor alternatif berdasarkan hasil AHP untuk kriteria dan subkriteria
+            $countAlternative = count($alternative);
+            $allAlternative = [];
+            for ($i = 1; $i <= $countAlternative; $i++) {
+                $allAlternative[$i] = $alternativeCriteria = AlternativeCriteria::where('alternative_id', $i)->get();
+            }
+
+            $rankAlternative = [];
+            $Kriteria_Prioritas = $HasilKriteria['priorities'];
+            $SubKriteria_Prioritas = [];
+            foreach ($subKirteriaArray as $index => $subKirteria) {
+                $SubKriteria_Prioritas[$index] = $subKirteria['priorities'];
+            }
+
+            $new_Subkriteria = [];
+            $nilai = 0;
+            foreach ($subKirteriaArray as $key => $sub) {
+                foreach ($sub['priorities'] as $key => $value) {
+                    $new_Subkriteria[$nilai] = $value;
+                    $nilai = $nilai + 1;
+                }
+            }
+
+            foreach ($allAlternative as $key_all => $alt) {
+                foreach ($alt as $key => $items) {
+                    $rankAlternative[$key_all - 1][$key] = $new_Subkriteria[($items->sub_criterion_id) - 1] * $Kriteria_Prioritas[($items->criterion_id) - 1];
+                }
+            }
+
+            // Menghitung nilai total skor untuk setiap alternatif dan melakukan pengurutan berdasarkan skor terbesar
+            $sumRank = [];
+            foreach ($alternative as $key => $value) {
+                $sumRank[$value['name']] = array_sum($rankAlternative[$key]);
+            }
+            arsort($sumRank);
+
+            // Mengumpulkan semua hasil perhitungan AHP untuk ditampilkan di halaman hasil
+            $data = [
+                'HasilKriteria' => $HasilKriteria,
+                'Hasil_SubKriteria' => $subKirteriaArray,
+                'Ranking' => $rankAlternative,
+                'SumRank' => $sumRank,
+            ];
+
+            // Simpan data hasil perhitungan AHP ke dalam sesi untuk diakses di halaman hasil
+            session()->flash('dt', $data);
+
+            // Tampilkan halaman hasil dengan data hasil perhitungan AHP
+            return view('alternatif.rank', compact('data'));
+        } catch (\Exception $e) {
+            $errorMessage = 'Terjadi error: ' . $e->getMessage();
+            return redirect()->back()->with('error', $errorMessage);
         }
 
-        // Menghitung nilai total skor untuk setiap alternatif dan melakukan pengurutan berdasarkan skor terbesar
-        $sumRank = [];
-        foreach ($alternative as $key => $value) {
-            $sumRank[$value['name']] = array_sum($rankAlternative[$key]);
-        }
-        arsort($sumRank);
-
-        // Mengumpulkan semua hasil perhitungan AHP untuk ditampilkan di halaman hasil
-        $data = [
-            'HasilKriteria' => $HasilKriteria,
-            'Hasil_SubKriteria' => $subKirteriaArray,
-            'Ranking' => $rankAlternative,
-            'SumRank' => $sumRank,
-        ];
-
-        // Simpan data hasil perhitungan AHP ke dalam sesi untuk diakses di halaman hasil
-        session()->flash('dt', $data);
-
-        // Tampilkan halaman hasil dengan data hasil perhitungan AHP
-        return view('alternatif.rank', compact('data'));
     }
 
     /**
